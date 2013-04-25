@@ -1,0 +1,13 @@
+*\.db
+*\.pyc
+*.pyc
+\.DS_Store
+settings/local.py
+.env/
+src
+django.pid
+/*/static/*
+!/*/static/common
+/*/media/*
+*~
+.idea/
