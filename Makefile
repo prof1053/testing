@@ -31,7 +31,6 @@ fresh_syncdb:
 	$(MAKE) manage -e CMD="migrate"
 	@echo Loading initial fixtures...
 	$(MANAGE) loaddata base_initial_data.json
-	$(MANAGE) loaddata cron.json
 	@echo Done
 
 test:
