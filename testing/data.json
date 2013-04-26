@@ -13,7 +13,8 @@
         "fields": [
             {"id": "department", "title": "Отдел", "type": "char"},
             {"id": "spots", "title": "Вместимость", "type": "int"},
-            {"id": "last_repair", "title": "Дата последнего ремонта", "type": "date"}
+            {"id": "last_repair", "title": "Дата последнего ремонта", "type": "date"},
+            {"id": "windows", "title": "Количество окон", "type": "int"}
         ]
     }
 }
