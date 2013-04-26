@@ -22,6 +22,8 @@ _ = lambda s: s
 
 sys.path.append(root('apps'))
 
+LOAD_MODELS_FROM = root('data.json')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
