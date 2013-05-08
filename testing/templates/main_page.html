@@ -8,6 +8,7 @@
             $('.model-name').on('click', function(){
                 $('#table').text('')
                 $('#model_form').text('')
+                $('.new-object legend').text('Add new object')
                 $.get('{% url show-model %}', {model_name: $(this).text()}, function(data){
                     $('#head').text('Выбрана модель '+data.model)
                     $("<tr>").attr({id: 'header'})
@@ -178,17 +179,24 @@
 
 
     <div id="left_sidebar">
+        <ul class="nav nav-list">
+        Выберите модель:
         {% for m in models %}
-            <li class="model-name"> {{ m }}</li>
+            <li class="model-name"><a> {{ m }}</a></li>
         {% endfor %}
+        </ul>
     </div>
     <div id="main">
-        <div id="head">
+        <div id="head" class="navbar-inner">
             Выберите модель для просмотра
         </div>
-        <div id="table">
+        <div class="table table-bordered" id="table">
         </div>
-        <div id="model_form">
+        <div class='new-object'>
+            <fieldset><legend></legend>
+                <div id="model_form" class='form-inline'>
+                </div>
+            </fieldset>
         </div>
     </div>
 {% endblock %}
