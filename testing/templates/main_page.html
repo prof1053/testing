@@ -1,0 +1,194 @@
+{% extends 'core.html' %}
+{% block title %}Models{% endblock %}
+
+{% block content %}
+    <script>
+        $(document).ready(function(){
+
+            $('.model-name').on('click', function(){
+                $('#table').text('')
+                $('#model_form').text('')
+                $.get('{% url show-model %}', {model_name: $(this).text()}, function(data){
+                    $('#head').text('Выбрана модель '+data.model)
+                    $("<tr>").attr({id: 'header'})
+                            .appendTo('#table');
+                    $.each(data.table_headers,function(key, value){
+                        $("<th>").attr({id: key})
+                                .text(value)
+                                .appendTo('#header');
+                    })
+                    $.each(data.objects,function(key, value){
+                        $("<tr>").attr({id: key, class: 'row-'+key})
+                                 .appendTo('#table');
+                        $.each(value,function(key2, value2){
+                            $("<td>").attr({class: 'edit-field', field_name: value2[0], type: value2[2], model: data.model})
+                                     .text(value2[1])
+                                     .appendTo('.row-'+key);
+
+                        })
+                    })
+
+                    $.each(data.table_fields,function(key, value){
+                        if (value[1] != 'AutoField'){
+                            $("<div>").attr({ id: 'new-'+key, class: 'new-div'})
+                                    .appendTo('#model_form');
+                            $("<label>").attr({class: 'new-label'})
+                                    .text(value[0])
+                                    .appendTo('#new-'+key);
+                            $("<input>").attr({class: 'new-field', field_name: value[0], type: value[1], model: data.model})
+                                    .appendTo('#new-'+key);
+                            if (value[1] == 'DateField'){
+                                $('input').last().datepicker();
+                                $('input').last().prop('readonly', true)
+                            }
+                            if (value[1] == 'IntegerField'){
+                                $('input').last().addClass('integer');
+                                $(".integer").NumericOnly();
+                            }
+                        }
+                    })
+                    $("<button>").attr({id: 'add-object', class: 'btn', type: 'submit'})
+                            .text('Add')
+                            .appendTo('#model_form');
+
+                    $('#add-object').on('click', function(){
+                        var fields = new Array()
+                        var values = new Array()
+                        var empty
+                        $.each($('.new-field'),function(){
+                            if($(this).val() == ''){
+                                empty = 'empty'
+                            }
+                            else{
+                                fields.push($(this).attr('field_name'))
+                                values.push($(this).attr('value'))
+                            }
+                        })
+                        if(empty == 'empty'){
+                            alert('All fields are required')
+                        }
+                        else{
+                            $.get('{% url add-object %}', {fields: fields, values: values, model_name: data.model}, function(data){
+                                $.each(data.object,function(key, value){
+                                    $("<tr>").attr({id: key, class: 'row-'+key})
+                                            .appendTo('#table');
+                                    $.each(value,function(key2, value2){
+                                        $("<td>").attr({class: 'edit-field', field_name: value2[0], type: value2[2], model: data.model})
+                                                .text(value2[1])
+                                                .appendTo('.row-'+key);
+                                    })
+                                })
+                                $.each($('.new-field'), function(){
+                                    $(this).val('')
+                                })
+                                $(".edit-field").on('click', edit_field)
+                            })
+                        }
+                    })
+
+
+                    $(".edit-field").on('click', edit_field)
+                })
+            })
+
+
+            function edit_field(){
+                if($('#input').length == 0){
+                    var type  = ($(this).attr('type'))
+                    var tr = $(this).parent('tr')
+                    var object_id = tr.attr('id')
+                    var model_name = $(this).attr('model')
+                    var field_name = $(this).attr('field_name')
+                    if (type != 'AutoField'){
+                        var input = "<input id='input' field_name='"+$(this).attr('field_name')+"' model='"+$(this).attr('model')+"' type='text' value='"+$(this).text()+"'>";
+                        $(this).replaceWith($(input));
+
+                        if (type == 'DateField'){
+                            $('#input').datepicker();
+                        }
+                        else if (type == 'IntegerField'){
+                            $('#input').addClass('integer');
+                            $(".integer").NumericOnly();
+                        }
+
+                        $('#input').focus()
+
+                        if (type == 'DateField'){
+                            $('#input').prop('readonly', true)
+                            $('#input').on('change', function(){
+                                var obj = $(this)
+                                save_changes(model_name, object_id, field_name, $(this).val(), type, obj);
+                            })
+                        }
+                        else{
+                            $('#input').on('blur', function(){
+                                var obj = $(this)
+                                if($(this).val() == ''){
+                                    alert('You need enter some value')
+                                }
+                                else{
+                                    save_changes(model_name, object_id, field_name, $(this).val(), type, obj);
+                                }
+                            })
+                        }
+                    }
+                    $(".edit-field").on('click', edit_field)
+                }
+            }
+
+        function save_changes(model_name, object_id, field_name, new_val, type, obj){
+            var td = "<td class='edit-field' field_name="+field_name+" model='"+model_name+"' type="+type+">"+new_val+"</td>";
+          //
+            $.get('{% url edit-field %}', {
+                model_name: model_name,
+                object_id: object_id,
+                field_name: field_name,
+                new_value: new_val
+            }, function(data){
+                obj.replaceWith(td);
+             })
+        }
+
+        jQuery.fn.NumericOnly =
+                function()
+                {
+                    return this.each(function()
+                    {
+                        $(this).on('keydown', function(event) {
+                            // Allow: backspace, delete, tab, escape, and enter
+                            if ( event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 ||
+                                // Allow: Ctrl+A
+                                    (event.keyCode == 65 && event.ctrlKey === true) ||
+                                // Allow: home, end, left, right
+                                    (event.keyCode >= 35 && event.keyCode <= 39)) {
+                                // let it happen, don't do anything
+                                return;
+                            }
+                            else {
+                                // Ensure that it is a number and stop the keypress
+                                if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+                                    event.preventDefault();
+                                }
+                            }
+                        });
+                    });
+                };
+    });
+    </script>
+
+
+    <div id="left_sidebar">
+        {% for m in models %}
+            <li class="model-name"> {{ m }}</li>
+        {% endfor %}
+    </div>
+    <div id="main">
+        <div id="head">
+            Выберите модель для просмотра
+        </div>
+        <div id="table">
+        </div>
+        <div id="model_form">
+        </div>
+    </div>
+{% endblock %}
