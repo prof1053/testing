@@ -6,7 +6,7 @@ from annoying.decorators import ajax_request
 
 def main_page(request):
     models = get_models(get_app(__name__.split('.')[0]))
-    models_list=[]
+    models_list = []
     for m in models:
         models_list.append(m._meta.object_name)
     return render(request, 'main_page.html', {'models': models_list})
@@ -15,7 +15,7 @@ def main_page(request):
 @ajax_request
 def show_model(request):
     model_name = request.GET.get('model_name', None)
-    string = __name__.split('.')[0]+model_name
+    string = __name__.split('.')[0] + model_name
     model = get_model(*string.split(' '))
 
     fields = model._meta.fields
@@ -30,8 +30,8 @@ def show_model(request):
     for object in model.objects.all():
         for field in object._meta.fields:
             if field.get_internal_type() == 'DateField':
-                setattr(object, field.name, getattr(object,field.name).strftime("%Y-%m-%d"))
-            data.append([field.name, getattr(object,field.name), field.get_internal_type()])
+                setattr(object, field.name, getattr(object, field.name).strftime("%Y-%m-%d"))
+            data.append([field.name, getattr(object, field.name), field.get_internal_type()])
         objects[object.id] = data
         data = []
     return {'table_headers': table_headers, 'table_fields': table_fields, 'objects': objects, 'model': model_name}
@@ -44,7 +44,7 @@ def edit_field(request):
     field_name = request.GET.get('field_name', None)
     new_value = request.GET.get('new_value', None)
 
-    string = __name__.split('.')[0]+model_name
+    string = __name__.split('.')[0] + model_name
     model = get_model(*string.split(' '))
     object = model.objects.get(id=object_id)
 
@@ -62,7 +62,7 @@ def add_object(request):
 
     dictionary = dict(zip(fields, values))
 
-    string = __name__.split('.')[0]+model_name
+    string = __name__.split('.')[0] + model_name
     model = get_model(*string.split(' '))
 
     new_object = model()

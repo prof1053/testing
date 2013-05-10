@@ -4,6 +4,7 @@ import os.path
 from django.db.models import CharField, IntegerField, DateField, Model
 from django.contrib import admin
 from django.conf import settings
+from django.contrib.admin.sites import AlreadyRegistered
 
 
 ALLOWED_FIELDS = {
@@ -13,7 +14,7 @@ ALLOWED_FIELDS = {
 }
 
 
-def get_models(data_file):
+def load_models(data_file):
     """
      Function that open json file where models are descripted,
      send received data to functions that creates fields and models,
@@ -24,8 +25,10 @@ def get_models(data_file):
         for name, description in models_text.items():
             fields = create_fields(description['fields'])
             model = create_models(name, description['title'], fields)
-            admin.site.register(model)
-
+            try:
+                admin.site.register(model)
+            except AlreadyRegistered:
+                pass
 
 def create_fields(text_fields):
     """
@@ -56,4 +59,4 @@ def create_models(name, title, fields):
     return type(str(name), (Model,), attrs)
 
 
-get_models(settings.LOAD_MODELS_FROM)
+load_models(settings.LOAD_MODELS_FROM)

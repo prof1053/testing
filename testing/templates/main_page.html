@@ -95,6 +95,8 @@
 
             function edit_field(){
                 if($('#input').length == 0){
+                    var old_val = $(this).text()
+                    console.log(old_val)
                     var type  = ($(this).attr('type'))
                     var tr = $(this).parent('tr')
                     var object_id = tr.attr('id')
@@ -122,18 +124,25 @@
                             })
                         }
                         else{
+                            $('#input').on('keypress', function(e) {
+                                if(e.which == 13) {
+                                    var obj = $(this)
+                                    if($(this).val() == ''){
+                                        alert('You need enter some value')
+                                    }
+                                    else{
+                                        save_changes(model_name, object_id, field_name, $(this).val(), type, obj);
+                                    }
+                                }
+                            });
+
                             $('#input').on('blur', function(){
-                                var obj = $(this)
-                                if($(this).val() == ''){
-                                    alert('You need enter some value')
-                                }
-                                else{
-                                    save_changes(model_name, object_id, field_name, $(this).val(), type, obj);
-                                }
+                                var td = "<td class='edit-field' field_name="+field_name+" model='"+model_name+"' type="+type+">"+old_val+"</td>";
+                                $(this).replaceWith(td);
+                                $(".edit-field").on('click', edit_field)
                             })
                         }
                     }
-                    $(".edit-field").on('click', edit_field)
                 }
             }
 
@@ -147,6 +156,7 @@
                 new_value: new_val
             }, function(data){
                 obj.replaceWith(td);
+                $(".edit-field").on('click', edit_field)
              })
         }
 
