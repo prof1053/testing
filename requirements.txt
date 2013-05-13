@@ -1,3 +1,7 @@
 django==1.4
 south
 django-annoying
+dj-database-url==0.2.1
+psycopg2==2.4.6
+gunicorn==0.17.2
+
